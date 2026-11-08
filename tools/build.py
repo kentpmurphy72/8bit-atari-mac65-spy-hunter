@@ -1,4 +1,4 @@
-"""Two-pass MAC/65 subset assembler; py65 supplies official NMOS opcodes."""
+"""Multipass MAC/65 subset assembler; py65 supplies official NMOS opcodes."""
 import sys, re, json, struct
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,7 +12,7 @@ def value(s, loose=False):
     low=s.startswith('<'); high=s.startswith('>')
     if low or high: s=s[1:]
     s=re.sub(r'\$([0-9A-F]+)',r'0x\1',s)
-    s=re.sub(r'\b[A-Z_][A-Z_0-9]*\b',lambda m:str(symbols.get(m[0],0)) if loose else str(symbols[m[0]]),s)
+    s=re.sub(r'\b[A-Z_][A-Z_0-9]*\b',lambda m:str(symbols.get(m[0],8192)) if loose else str(symbols[m[0]]),s)
     n=eval(s,{'__builtins__':{}},{})
     return n&255 if low else (n>>8)&255 if high else n
 asm=Assembler(MPU())
@@ -43,7 +43,7 @@ for stage in range(6):
                     expr=arg[1:] if immediate else arg
                     if suffix: expr=expr[:-2]
                     n=value(expr,stage<5)
-                    # Force absolute addressing except immediate and relative.
+                    # py65 selects zero page for addresses below $100; RAM labels are absolute.
                     operand=('#$%02X'%n if immediate else '$%04X'%n)+suffix
                 if op.startswith('B') and op not in ('BIT','BRK'):
                     if stage==5 and not -128 <= value(arg)-(pc+2) <=127: raise ValueError('branch out of range')
@@ -63,3 +63,4 @@ while i<len(addresses):
 print(f'Built {len(out)} bytes')
 
 (ROOT/"dist/game.mac").write_bytes(bytes([155]).join((str((i+1)*10)+" "+line).encode("ascii") for i,line in enumerate(lines))+bytes([155]))
+

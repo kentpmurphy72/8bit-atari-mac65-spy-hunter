@@ -7,12 +7,14 @@ An original, compact Spy Hunter-inspired survival driving game. All runtime code
 Load `dist/road-agent.xex` using an Atari 800XL/64 KB emulator with BASIC disabled (hold OPTION during boot on hardware). Use joystick port 1:
 
 - Left/right: steer across the highway.
-- Up: accelerate (traffic approaches faster).
+- Up/down: increase/decrease gear (1–3). Gear persists when released.
 - Fire: shoot ahead; hold for repeated shots.
-- SELECT: expend one oil charge to clear nearby traffic behind/alongside the car. Release before using again.
-- Fire after GAME OVER: restart with three lives and three oil charges.
+- SELECT: deploy oil behind the car.
+- OPTION: deploy a wider smoke effect behind the car.
+- Release the console button before using another charge; only one rear effect can be active.
+- Fire after GAME OVER: restart with three lives and three charges of each rear weapon.
 
-Your car faces up near the bottom. Enemy cars face down; tracking enemies move toward your column and fire. Civilian cars have square windows: shooting them suppresses scoring temporarily. Supply vehicles replenish oil to three charges when touched. A collision or enemy bullet costs a life, followed by flashing invulnerability. Passing vehicles earns points; destroying enemies earns two. After 100 points, spawn opportunities double. The HUD shows score, lives, and oil. There is no final level: survive and improve your score.
+The white car is yours. Red cars are enemies; blue cars are civilians. The armored tracking enemy resists bullets and fires at you. Shooting civilians temporarily suppresses scoring. Align with a supply truck in gear 1 for twelve updates to replenish both rear weapons. Collisions, enemy bullets, and leaving the road cost lives; flashing marks temporary invulnerability. Score increases with survival, passing vehicles, and destroying enemies. After 100 points, spawn opportunities double. The HUD shows score, lives, oil, smoke, and gear.
 
 ## Build and check
 
@@ -29,14 +31,15 @@ The build tool implements only the MAC/65 subset used here, not the complete MAC
 
 ## Validation and scope
 
-The shipped executable is tested in py65's NMOS 6502 CPU simulator. Tests cover XEX entry metadata, steering, shooting, collisions, invulnerability, supplies, oil edge detection, enemy shots, game over, and 2,000 randomized updates. This does **not** emulate ANTIC, GTIA, POKEY, OS VBI, or joystick hardware. Display, sound, PAL/NTSC pacing, and loading in a full Atari emulator or on a physical 800XL remain unvalidated. No full Atari emulator was found in the inspected command path.
+The current executable passes py65 NMOS 6502 tests for steering, shooting, collisions, invulnerability, truck reloading, oil/smoke activation, armored enemies, road bends, off-road damage, drawing bounds, enemy bullets, game over, and 2,000 randomized updates. This does **not** emulate ANTIC, GTIA, POKEY, OS VBI, or joystick hardware. Altirra was obtained, but interactive testing was stopped before the game was loaded. The user will playtest this build. Display, sound, PAL/NTSC pacing, native MAC/65 assembly, and physical 800XL loading remain unvalidated.
 
-This is a compact playable first release, not an arcade-faithful finished recreation. Graphics are 8x8 monochrome character sprites with a scrolling lane-marker effect and a fixed straight road. There are no boats, helicopters, weapon trucks/docking, smoke, road forks, terrain transitions, arcade music, saved high scores, or pause menu. Oil is an immediate area attack rather than a persistent road hazard. PAL runs slower than NTSC. These are known scope limitations, not validated hardware restrictions.
+This revision replaces tiny monochrome cars with 2x3-tile multicolor vehicles (8x24 multicolor pixels), adds a bending highway, animated lane markings, persistent gears, oil and smoke effects, armored enemies, and simplified truck reloading. It remains a work in progress, not a finished arcade-faithful port. Boats, helicopters, road forks, terrain transitions, arcade music, saved high scores, and pause are absent. Rear effects have a fixed lifetime/location rather than fully simulated world motion; smoke's collision area is wider than its graphic. Truck docking uses overlap at low speed rather than a loading animation. Vehicle movement remains cell-based. Rendering is not double-buffered, and pacing/tearing need playtesting.
 
 ## Repository
 
 - `src/game.asm`: all game runtime and graphics data.
 - `tools/build.py`: deterministic assembler frontend and XEX writer.
+- `tools/artwork.py`: optional regeneration of the original tile art embedded in the assembly.
 - `tools/vendor`: pinned py65 and its original license.
 - `tests/test_game.py`: execution tests against the built binary.
 - `dist`: ready-to-load executable and source export.
