@@ -4,7 +4,7 @@ An original, compact Spy Hunter-inspired survival driving game. All runtime code
 
 ## Play
 
-Load `dist/road-agent.xex` using an Atari 800XL/64 KB emulator with BASIC disabled (hold OPTION during boot on hardware). Use joystick port 1:
+Load `dist/road-agent.xex` using an Atari 800XL/64 KB emulator with BASIC disabled (hold OPTION during boot on hardware). The title screen waits for FIRE or the Atari START console key. Release the button to begin. Gameplay and engine sound remain idle while the title is displayed. Use joystick port 1:
 
 - Left/right: steer across the highway.
 - Up/down: increase/decrease gear (1–3). Gear persists when released.
@@ -46,3 +46,9 @@ This revision replaces tiny monochrome cars with 2x3-tile multicolor vehicles (8
 - `docs`: architecture and test notes.
 
 Reference: [MAC/65 reference manual](https://www.atarimania.com/documents/MAC-65-Reference-Manual.pdf).
+
+## Title screen
+
+The approved arcade-style title is implemented as an original 160x192 four-color bitmap: shadowed SPY HUNTER lettering, a white interceptor on the highway, blinking start prompt, and controls. `docs/title-screen.png` previews the exact source pixels. `python tools/title_art.py` regenerates the embedded assembly data and preview (Pillow needed only for that optional preview step). The normal build still needs no Pillow.
+
+Title display and idle/blinking behavior were visually checked in Altirra 4.40 with XL/AltirraOS, NTSC and 320 KB. A scanline crossing a 4 KB display boundary was found and corrected by padding each bitmap line to 64 bytes. FIRE and START launch/release behavior passes CPU integration tests; the automated keypress did not establish an emulator gameplay transition, so that remains a manual check.

@@ -68,3 +68,35 @@ for i in range(2000):
  if get('DEAD'):run('RESET')
 print('PASS: XEX entry, steering, shooting, collision, invulnerability, truck docking, oil/smoke, armor, bends, rendering bounds, enemy fire, game over, 2000-update soak')
 print('Maximum simulated update/draw cycles:',maxcycles,'(excludes Atari DMA and OS interrupts)')
+# Title startup integration: advance the OS clock and use real entry point.
+def boot_until(target,limit=200000):
+ for i in range(limit):
+  if m.pc==s[target]:return
+  if i%100==0:m.memory[0x14]=(m.memory[0x14]+1)&255
+  m.step()
+ raise AssertionError(('Did not reach',target,hex(m.pc)))
+for trigger in ('fire','start'):
+ m.pc=s['START'];m.sp=255;m.memory[0x284]=1;m.memory[0xd01f]=7
+ boot_until('TITLEWAIT')
+ assert m.memory[0x230]+256*m.memory[0x231]==s['TITLEDL']
+ before=(get('SCORE'),get('LIVES'),get('TICK'))
+ for i in range(100000):
+  if i%100==0:m.memory[0x14]=(m.memory[0x14]+1)&255
+  m.step()
+  assert m.pc!=s['MAIN']
+ assert before==(get('SCORE'),get('LIVES'),get('TICK'))
+ if trigger=='fire':m.memory[0x284]=0
+ else:m.memory[0xd01f]=6
+ boot_until('TITLERELEASE')
+ m.memory[0x284]=1;m.memory[0xd01f]=7
+ boot_until('MAIN')
+ assert get('LIVES')==3 and get('SCORE')==0 and get('BULY')==0
+ assert m.memory[0x230]+256*m.memory[0x231]==s['DLIST']
+m.memory[0x14]=32;run('TITLEBLINK');assert not any(m.memory[0x9600:0x9800])
+m.memory[0x14]=0;run('TITLEBLINK');assert bytes(m.memory[0x9600:0x9800])==bytes(m.memory[s['TITLEPROMPT']:s['TITLEPROMPT']+512])
+# Every bitmap scanline has an LMS and the final JVB targets the title list.
+for y in range(192):
+ a=s['TITLEDL']+3+3*y
+ assert m.memory[a]==0x4e
+ assert m.memory[a+1]+256*m.memory[a+2]==0x7000+64*y
+print('PASS: title idle, blink, FIRE/START release-gated launch, bitmap display list')

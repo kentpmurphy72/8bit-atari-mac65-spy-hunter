@@ -28,3 +28,11 @@ Configure Atari 800XL, 64 KB, standard OS, BASIC off. Load XEX. Confirm 24 rows,
 The first two rows use ANTIC 2 for the HUD; the remaining 22 use ANTIC 4. Vehicles occupy six tiles. A 24-byte edge table shifts bends down the screen. The lane-marking character patterns rotate by scanline using the speed accumulator. Oil/smoke share one timed rear effect. All code and tile data remain in the assembly source; tools/artwork.py is an optional source-art generator.
 
 The latest build is prepared for user playtesting. Altirra was downloaded but no successful game load or interactive test was completed. The measured 46,574 cycles exceed one NTSC frame even before display DMA; do not infer 30 or 60 fps from the clock gate.
+
+## Title memory and start gate
+
+- $6C00: title ANTIC E display list, explicit LMS per scanline.
+- $7000–$9FFF: 160x192 bitmap with 40 visible bytes and 24 padding bytes per scanline. Padding prevents any line crossing ANTIC's 4 KB boundary.
+- The title loop polls RTCLOK, blinking an eight-row prompt every 32 ticks. No gameplay routines execute here. Both buttons must first be released; a fresh FIRE/START press followed by release switches to the gameplay display list and resets the game.
+- The title is shown at boot. Existing game-over FIRE restart behavior is preserved.
+- CPU tests cover real START entry, idle state, both triggers, release gating, blink copy/clear, and all 192 LMS addresses.
