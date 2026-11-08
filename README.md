@@ -52,3 +52,9 @@ Reference: [MAC/65 reference manual](https://www.atarimania.com/documents/MAC-65
 The approved arcade-style title is implemented as an original 160x192 four-color bitmap: shadowed SPY HUNTER lettering, a white interceptor on the highway, blinking start prompt, and controls. `docs/title-screen.png` previews the exact source pixels. `python tools/title_art.py` regenerates the embedded assembly data and preview (Pillow needed only for that optional preview step). The normal build still needs no Pillow.
 
 Title display and idle/blinking behavior were visually checked in Altirra 4.40 with XL/AltirraOS, NTSC and 320 KB. A scanline crossing a 4 KB display boundary was found and corrected by padding each bitmap line to 64 bytes. FIRE and START launch/release behavior passes CPU integration tests; the automated keypress did not establish an emulator gameplay transition, so that remains a manual check.
+
+## Shared interceptor artwork
+
+The title and driving player now use the same 12x40-pixel sports-car artwork from `tools/interceptor.py`: tapered nose, twin hood stripes, wide windshield and rear glass, side trim, wheel recesses, and paired rear lamps. The driving sprite occupies 3x5 character cells; collision and projectile positions account for this larger size. Enemy vehicle art is unchanged. Dark details share the road/background color in the current four-color mode, so the wheel recesses do not have a separate black shade.
+
+Regenerate with `python tools/artwork.py`, `python tools/title_art.py`, then `python tools/build.py`. Normal builds consume the checked-in assembly data without needing these generators. Tests decode both the assembled title bitmap and gameplay tiles and verify their pixels match exactly. See `docs/interceptor-comparison.png` for an enlarged preview.

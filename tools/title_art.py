@@ -1,5 +1,6 @@
 """Generate the hardware-sized title bitmap and embed MAC/65 data in game.asm."""
 from pathlib import Path
+from interceptor import INTERCEPTOR
 R=Path(__file__).resolve().parents[1]
 font={
 'A':['01110','10001','10001','11111','10001','10001','10001'],
@@ -40,9 +41,9 @@ for y in range(68,145):
  rect(27,y,3,1,2 if (y//6)%2 else 3);rect(130,y,3,1,2 if (y//6)%2 else 3)
  if (y%16)<9:
   rect(62,y,1,1,2);rect(98,y,1,1,2)
-car=['00022000','00222200','00222200','02222220','02222220','02222220','00222200','00200200','00200200','00200200','00222200','00222200','00222200','00222200','00222200','00222200','00222200','00222200','00222200','00200200','00222200','00222200','00300300','00000000']
-for y,row in enumerate(car):
- for x,c in enumerate(row):rect(72+x*2,82+y*2,2,2,int(c))
+# The exact same silhouette/detail pixels as the driving sprite.
+for y,row in enumerate(INTERCEPTOR):
+ for x,c in enumerate(row):rect(74+x,84+y,1,1,int(c))
 text('PRESS FIRE OR START',153)
 text('JOYSTICK: STEER  FIRE: SHOOT',174)
 text('SELECT: OIL  OPTION: SMOKE',184)
